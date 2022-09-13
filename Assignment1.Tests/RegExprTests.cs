@@ -31,7 +31,7 @@ public class RegExprTests
     }
     
     [Fact] 
-    public void innterText_test() 
+    public void innerText_test() 
     {
         //Arrange
         var html = "<div><p>A <b>regular expression</b>, <b>regex</b> or <b>regexp</b> (sometimes called a <b>rational expression</b>) is, in <a href=\"https://en.wikipedia.org/wiki/Theoretical_computer_science\" title=\"Theoretical computer science\">theoretical computer science</a> and <a href=\"https://en.wikipedia.org/wiki/Formal_language\" title=\"Formal language\">formal language</a> theory, a sequence of <a href=\"https://en.wikipedia.org/wiki/Character_(computing)\" title=\"Character (computing)\">characters</a> that define a <i>search <a href=\"https://en.wikipedia.org/wiki/Pattern_matching\" title=\"Pattern matching\">pattern</a></i>. Usually this pattern is then used by <a href=\"https://en.wikipedia.org/wiki/String_searching_algorithm\" title=\"String searching algorithm\">string searching algorithms</a> for \"find\" or \"find and replace\" operations on <a href=\"https://en.wikipedia.org/wiki/String_(computer_science)\" title=\"String (computer science)\">strings</a>.</p> </div>";
@@ -46,7 +46,7 @@ public class RegExprTests
     }
 
     [Fact]
-    public void innterText_test2() 
+    public void innerText_test2() 
     {
         //Arrange
         var html = "<div><p>The phrase <i>regular expressions</i> (and consequently, regexes) is often used to mean the specific, standard textual syntax for representing <u>patterns</u> that matching <em>text</em> need to conform to.</p></div>";
@@ -59,5 +59,45 @@ public class RegExprTests
         var expected = new [] {"The phrase regular expressions (and consequently, regexes) is often used to mean the specific, standard textual syntax for representing patterns that matching text need to conform to."};
         Assert.Equal(expected,output);
     
+    }
+
+    [Fact]
+    public void urlTestWithTitles() 
+    {
+        //Arrange 
+        var html = "<div><p>A <b>regular expression</b>, <b>regex</b> or <b>regexp</b> (sometimes called a <b>rational expression</b>) is, in <a href=\"https://en.wikipedia.org/wiki/Theoretical_computer_science\" title=\"Theoretical computer science\">theoretical computer science</a> and <a href=\"https://en.wikipedia.org/wiki/Formal_language\" title=\"Formal language\">formal language</a> theory, a sequence of <a href=\"https://en.wikipedia.org/wiki/Character_(computing)\" title=\"Character (computing)\">characters</a> that define a <i>search <a href=\"https://en.wikipedia.org/wiki/Pattern_matching\" title=\"Pattern matching\">pattern</a></i>. Usually this pattern is then used by <a href=\"https://en.wikipedia.org/wiki/String_searching_algorithm\" title=\"String searching algorithm\">string searching algorithms</a> for \"find\" or \"find and replace\" operations on <a href=\"https://en.wikipedia.org/wiki/String_(computer_science)\" title=\"String (computer science)\">strings</a>.</p> </div>";
+        //Act
+        var output = RegExpr.Urls(html);
+
+        //Assert
+        var expected = new(Uri, string)[] 
+            {
+                (new Uri("https://en.wikipedia.org/wiki/Theoretical_computer_science"), "Theoretical computer science"),
+                (new Uri("https://en.wikipedia.org/wiki/Formal_language"), "Formal language"),
+                (new Uri("https://en.wikipedia.org/wiki/Character_(computing)"), "Character (computing)"),
+                (new Uri("https://en.wikipedia.org/wiki/Pattern_matching"), "Pattern matching"),
+                (new Uri("https://en.wikipedia.org/wiki/String_searching_algorithm"),"String searching algorithm"),
+                (new Uri("https://en.wikipedia.org/wiki/String_(computer_science)"),"String (computer science)")
+            };
+        Assert.Equal(expected, output);
+
+    }
+
+    [Fact]
+    public void urlTestWithoutTitles()
+    {
+        //Arrange
+        var html = "<div><p>A <b>regular expression</b>, <b>regex</b> or <b>regexp</b> (sometimes called a <b>rational expression</b>) is, in <a href=\"https://en.wikipedia.org/wiki/Theoretical_computer_science\">This is inner text</a> <a href=\"https://en.wikipedia.org/wiki/String_(computer_science)\">This is even more inner text</a>.</p> </div>";
+        
+        //Act 
+        var output = RegExpr.Urls(html);
+
+        //Assert
+        var expected = new(Uri, string)[] 
+            {
+                (new Uri("https://en.wikipedia.org/wiki/Theoretical_computer_science"), "This is inner text"),
+                (new Uri("https://en.wikipedia.org/wiki/String_(computer_science)"), "This is even more inner text")
+            };
+        Assert.Equal(expected, output);
     }
 }
